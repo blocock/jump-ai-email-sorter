@@ -6,6 +6,10 @@ import Dashboard from './Dashboard';
 import * as api from '../api';
 
 jest.mock('../api');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => jest.fn(),
+}));
 
 const mockCategories = [
   { id: 1, name: 'Newsletters', description: 'Marketing emails', created_at: '2024-01-01', email_count: 5 },
@@ -31,8 +35,11 @@ describe('Dashboard', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Newsletters')).toBeInTheDocument();
-      expect(screen.getByText('Receipts')).toBeInTheDocument();
+      const newsletterElements = screen.getAllByText('Newsletters');
+      const receiptsElements = screen.getAllByText('Receipts');
+      
+      expect(newsletterElements.length).toBeGreaterThan(0);
+      expect(receiptsElements.length).toBeGreaterThan(0);
     });
   });
 

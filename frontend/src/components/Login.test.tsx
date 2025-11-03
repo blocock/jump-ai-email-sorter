@@ -4,6 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import Login from './Login';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => jest.fn(),
+}));
+
 describe('Login', () => {
   test('renders login page', () => {
     render(
