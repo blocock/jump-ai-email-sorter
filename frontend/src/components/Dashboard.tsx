@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Category, Email, EmailDetail, GmailAccount, categoriesAPI, emailsAPI, accountsAPI, authAPI } from '../api';
 import CategoryModal from './CategoryModal';
@@ -17,18 +17,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   
-  useEffect(() => {
-    loadCategories();
-    loadAccounts();
-  }, []);
-  
-  useEffect(() => {
-    if (selectedCategory) {
-      loadEmails(selectedCategory.id);
-    }
-  }, [selectedCategory]);
-  
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const data = await categoriesAPI.list();
       setCategories(data);
@@ -40,9 +29,9 @@ function Dashboard() {
       console.error('Error loading categories:', error);
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
   
-  const loadEmails = async (categoryId: number) => {
+  const loadEmails = useCallback(async (categoryId: number) => {
     try {
       const data = await emailsAPI.listByCategory(categoryId);
       setEmails(data);
@@ -50,16 +39,27 @@ function Dashboard() {
     } catch (error) {
       console.error('Error loading emails:', error);
     }
-  };
+  }, []);
   
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     try {
       const data = await accountsAPI.list();
       setAccounts(data);
     } catch (error) {
       console.error('Error loading accounts:', error);
     }
-  };
+  }, []);
+  
+  useEffect(() => {
+    loadCategories();
+    loadAccounts();
+  }, [loadCategories, loadAccounts]);
+  
+  useEffect(() => {
+    if (selectedCategory) {
+      loadEmails(selectedCategory.id);
+    }
+  }, [selectedCategory, loadEmails]);
   
   const handleLogout = () => {
     localStorage.removeItem('token');
