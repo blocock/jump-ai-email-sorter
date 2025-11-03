@@ -1,16 +1,26 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 from app.gmail_service import GmailService
 from datetime import datetime
 
 @pytest.fixture
 def gmail_service():
-    return GmailService(
-        access_token="test_token",
-        refresh_token="test_refresh",
-        client_id="test_client_id",
-        client_secret="test_client_secret"
-    )
+    with patch('app.gmail_service.build') as mock_build:
+        # Create a mock service
+        mock_service = MagicMock()
+        mock_build.return_value = mock_service
+        
+        service = GmailService(
+            access_token="test_token",
+            refresh_token="test_refresh",
+            client_id="test_client_id",
+            client_secret="test_client_secret"
+        )
+        
+        # Attach the mock service so tests can use it
+        service.service = mock_service
+        
+        return service
 
 def test_parse_email_address(gmail_service):
     # Test with name and email
